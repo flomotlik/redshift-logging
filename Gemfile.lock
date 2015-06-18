@@ -11,15 +11,25 @@ GEM
     aws-sdk-resources (2.0.30)
       aws-sdk-core (= 2.0.30)
     builder (3.2.2)
+    coderay (1.1.0)
+    dotenv (1.0.2)
     jmespath (1.0.2)
       multi_json (~> 1.0)
+    method_source (0.8.2)
     multi_json (1.11.0)
     multi_xml (0.5.5)
     pg (0.18.1)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    slop (3.6.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   aws-sdk
+  dotenv
   pg
+  pry

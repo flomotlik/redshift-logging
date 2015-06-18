@@ -15,13 +15,17 @@ def logging_cluster
   redshift.describe_clusters(cluster_identifier: ENV['CLUSTER_IDENTIFIER'])[:clusters].first
 end
 
+def cluster_available
+  logging_cluster[:cluster_status] == 'available'
+end
+
 puts "CREATING REDSHIFT CLUSTER"
 
 resp = redshift.create_cluster(
   db_name: ENV["DB_NAME"],
   # required
   cluster_identifier: ENV['CLUSTER_IDENTIFIER'],
-  cluster_type: "single-node",
+  cluster_type: ENV['CLUSTER_TYPE'],
   #cluster_type: "multi-node",
   # required
   node_type: "dw2.large",
@@ -30,12 +34,12 @@ resp = redshift.create_cluster(
   # required
   master_user_password: ENV["REDSHIFT_PASSWORD"],
   port: ENV["PORT"],
-  #number_of_nodes: ENV["NUMBER_OF_NODES"],
+  number_of_nodes: ENV["NUMBER_OF_NODES"],
   publicly_accessible: true,
   encrypted: true
-)
+) unless cluster_available
 
-until logging_cluster[:cluster_status] == 'available' do
+until cluster_available do
   puts "Waiting for Cluster to be ready"
   sleep 10
 end
@@ -43,6 +47,9 @@ end
 redshift_host = logging_cluster[:endpoint][:address]
 
 puts "HOST: #{redshift_host}"
+
+puts "CONNECT TO DATABASE WITH FOLLOWING PSQL COMMAND (Take the password from .env file):"
+puts "psql -h #{redshift_host} -U #{ENV['REDSHIFT_USERNAME']} -p #{ENV['PORT']} -d #{ENV['DB_NAME']}"
 
 connection = PG.connect(host: redshift_host, user: ENV["REDSHIFT_USERNAME"], password: ENV['REDSHIFT_PASSWORD'], port: ENV["PORT"], dbname: ENV['DB_NAME'])
 
